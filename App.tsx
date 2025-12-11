@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { ShoppingCart, Scale, Check, Plus, ClipboardList, History, Users, Wallet, X, Store, ChefHat, BarChart3, Calendar, Camera, Trophy, TrendingUp, DollarSign, UserPlus, Phone, MapPin, Search, User, ArrowRight, Save, Receipt, ChevronDown, ChevronUp, AlertCircle, Package, Pencil, Trash2, Box, Minus } from 'lucide-react';
+import { ShoppingCart, Scale, Check, Plus, ClipboardList, History, Users, Wallet, X, Store, ChefHat, BarChart3, Calendar, Camera, Trophy, TrendingUp, DollarSign, UserPlus, Phone, MapPin, Search, User, ArrowRight, Save, Receipt, ChevronDown, ChevronUp, AlertCircle, Package, Pencil, Trash2, Box, Minus, Download } from 'lucide-react';
 import { CartItem, MOZZARELLA_PRICE_PER_KG, Order, PaymentMethod, Customer, OrderStatus, Product, UnitType } from './types';
 import { formatCurrency, IMAGES, formatWeight } from './constants';
 import { CartDrawer } from './components/CartDrawer';
@@ -64,6 +64,27 @@ const App: React.FC = () => {
 
   // UI Toggles
   const [showSavedOrders, setShowSavedOrders] = useState(false);
+  
+  // PWA Install State
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+
+  useEffect(() => {
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    });
+  }, []);
+
+  const handleInstallClick = () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult: any) => {
+        if (choiceResult.outcome === 'accepted') {
+          setDeferredPrompt(null);
+        }
+      });
+    }
+  };
 
   // Load data from LocalStorage on mount
   useEffect(() => {
@@ -1045,6 +1066,17 @@ const App: React.FC = () => {
            </div>
            
            <div className="flex gap-2">
+               {/* Install Button (PWA) */}
+               {deferredPrompt && (
+                   <button 
+                     onClick={handleInstallClick}
+                     className="bg-mv-yellow-400 hover:bg-mv-yellow-500 text-mv-blue-900 p-2 rounded-lg transition-colors flex items-center gap-1.5 shadow-sm animate-pulse"
+                   >
+                      <Download className="w-5 h-5" />
+                      <span className="text-xs font-bold hidden sm:block">Instalar App</span>
+                   </button>
+               )}
+
                <button 
                  onClick={() => setIsSommelierOpen(true)}
                  className="bg-white/10 hover:bg-white/20 p-2 rounded-lg transition-colors flex items-center gap-1.5"
